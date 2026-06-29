@@ -1,0 +1,121 @@
+Liga del YouTube:
+
++
+
+Guion para la exposición: Sistemas Expertos
+
+Diapositiva 1. Portada
+
+Buenos días profesor y compañeros.
+
+Mi nombre es Adrián Centeno Dama y en esta ocasión les hablaré sobre los Sistemas Expertos, una de las ramas más importantes de la Inteligencia Artificial. Durante esta presentación explicaré qué son, cómo funcionan, cuáles son sus componentes principales, sus tipos, aplicaciones y la importancia que tienen en la actualidad.
+
+---
+
+Diapositiva 2. ¿Qué es un Sistema Experto?
+
+Un sistema experto es un programa de computadora diseñado para resolver problemas de la misma manera que lo haría un especialista humano.
+
+Su objetivo es utilizar el conocimiento de expertos para ayudar a las personas a tomar decisiones o resolver situaciones complejas.
+
+Estos sistemas pueden analizar información, aplicar reglas y ofrecer soluciones, además de explicar por qué llegaron a una determinada conclusión.
+
+---
+
+Diapositiva 3. Conocimiento
+
+El conocimiento es la información y la experiencia que posee una persona sobre un tema.
+
+En los sistemas expertos existen dos tipos principales de conocimiento.
+
+El primero es el conocimiento explícito, que puede escribirse en libros, documentos o bases de datos.
+
+El segundo es el conocimiento tácito, que se obtiene mediante la experiencia de los especialistas y suele ser más difícil de transmitir.
+
+Toda esta información es la que permite que un sistema experto funcione correctamente.
+
+---
+
+Diapositiva 4. Base de conocimiento
+
+La base de conocimiento es el lugar donde se almacena toda la información del sistema experto.
+
+Aquí se guardan hechos, reglas y experiencias proporcionadas por especialistas.
+
+Podemos decir que la base de conocimiento es el "cerebro" del sistema, ya que sin ella el sistema no tendría información para analizar ni podría ofrecer respuestas.
+
+---
+
+Diapositiva 5. Motor de inferencia
+
+El motor de inferencia es el componente encargado de analizar la información de la base de conocimiento.
+
+Su función es aplicar las reglas disponibles para llegar a una conclusión o recomendar una solución.
+
+En otras palabras, es quien realiza el razonamiento del sistema experto.
+
+Gracias a este componente, el sistema puede responder preguntas o resolver problemas de manera lógica.
+
+---
+
+Diapositiva 6. Línea del tiempo
+
+Los sistemas expertos comenzaron a desarrollarse en la década de 1960.
+
+En los años 70 aparecieron sistemas importantes como DENDRAL y MYCIN, utilizados principalmente en química y medicina.
+
+Durante los años 80 tuvieron un gran crecimiento y fueron utilizados por muchas empresas.
+
+En los años 90 su popularidad disminuyó debido a los altos costos de desarrollo y mantenimiento.
+
+Actualmente, los sistemas expertos continúan utilizándose y se han combinado con tecnologías modernas como el aprendizaje automático y la inteligencia artificial generativa.
+
+---
+
+Diapositiva 7. Tipos de Sistemas Expertos
+
+Existen varios tipos de sistemas expertos.
+
+Los más conocidos son los basados en reglas, que toman decisiones mediante condiciones del tipo "si ocurre esto, entonces hacer aquello".
+
+También existen los sistemas basados en casos, que comparan problemas nuevos con situaciones ya resueltas.
+
+Los sistemas difusos trabajan con información que no es completamente exacta.
+
+Finalmente, los sistemas híbridos combinan diferentes técnicas para obtener mejores resultados.
+
+---
+
+Diapositiva 8. Aplicaciones
+
+Los sistemas expertos tienen muchas aplicaciones.
+
+En medicina ayudan a apoyar el diagnóstico de enfermedades.
+
+En la industria permiten detectar fallas en máquinas.
+
+En las finanzas ayudan a evaluar riesgos y tomar decisiones.
+
+También se utilizan en educación, atención al cliente, ingeniería y muchas otras áreas donde se requiere conocimiento especializado.
+
+---
+
+Diapositiva 9. Ventajas y desventajas
+
+Entre las ventajas podemos mencionar que ofrecen respuestas rápidas, reducen errores, están disponibles en cualquier momento y ayudan en la toma de decisiones.
+
+Sin embargo, también presentan algunas desventajas.
+
+Su desarrollo puede ser costoso, requieren mantenimiento constante y dependen del conocimiento que proporcionan los especialistas.
+
+Además, no sustituyen completamente la experiencia y el criterio de un experto humano.
+--
+Diapositiva 10. Conclusión
+
+Para concluir, los sistemas expertos representan una de las aplicaciones más importantes de la Inteligencia Artificial.
+
+Aunque hoy existen tecnologías más avanzadas, siguen siendo herramientas muy útiles para resolver problemas específicos y apoyar la toma de decisiones.
+
+Su evolución ha permitido el desarrollo de nuevas aplicaciones inteligentes que continúan mejorando diferentes áreas como la medicina, la industria y la educación.
+
+Muchas gracias por su atención.
