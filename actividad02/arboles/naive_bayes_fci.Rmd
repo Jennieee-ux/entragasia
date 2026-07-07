@@ -1,0 +1,71 @@
+---
+title: "Actividad NB FCI"
+author: "Actividad de Naive Bayes"
+output:
+  html_document:
+    toc: true
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Objetivo
+
+Aplicar Naive Bayes en R a un conjunto de 30 estudiantes de la FCI. Las variables
+predictoras son `TiempoEstudio`, `Asistencia`, `Participacion` y `SituacionEcon`.
+La variable objetivo es `Rendimiento`.
+
+## Codigo
+
+```{r}
+library(e1071)
+library(caret)
+
+datos <- data.frame(
+  TiempoEstudio = c("Alto","Medio","Bajo","Alto","Medio","Alto","Bajo","Medio","Alto","Bajo",
+                    "Alto","Medio","Bajo","Medio","Alto","Bajo","Medio","Alto","Bajo","Medio",
+                    "Alto","Medio","Bajo","Alto","Medio","Bajo","Alto","Medio","Bajo","Alto"),
+  Asistencia = c("Alta","Media","Baja","Alta","Media","Alta","Baja","Alta","Media","Baja",
+                 "Alta","Media","Baja","Alta","Alta","Media","Media","Alta","Baja","Alta",
+                 "Media","Alta","Baja","Alta","Media","Baja","Alta","Media","Baja","Alta"),
+  Participacion = c("Alta","Baja","Baja","Media","Media","Alta","Baja","Media","Alta","Media",
+                    "Alta","Media","Baja","Media","Alta","Baja","Alta","Media","Baja","Media",
+                    "Alta","Media","Media","Alta","Baja","Baja","Media","Alta","Baja","Alta"),
+  SituacionEcon = c("Buena","Mala","Mala","Buena","Buena","Buena","Mala","Buena","Buena","Mala",
+                    "Buena","Buena","Mala","Buena","Buena","Mala","Mala","Buena","Mala","Buena",
+                    "Buena","Mala","Mala","Buena","Buena","Mala","Buena","Buena","Mala","Buena"),
+  Rendimiento = c("Excelente","Regular","Deficiente","Bueno","Bueno","Excelente","Deficiente","Bueno","Excelente","Regular",
+                  "Excelente","Bueno","Deficiente","Bueno","Excelente","Regular","Bueno","Excelente","Deficiente","Bueno",
+                  "Excelente","Bueno","Regular","Excelente","Regular","Deficiente","Bueno","Bueno","Deficiente","Excelente")
+)
+
+datos[] <- lapply(datos, factor)
+
+set.seed(20260704)
+idx <- createDataPartition(datos$Rendimiento, p = 0.8, list = FALSE)
+entrenamiento <- datos[idx, ]
+prueba <- datos[-idx, ]
+
+modelo <- naiveBayes(Rendimiento ~ ., data = entrenamiento, laplace = 1)
+predicciones <- predict(modelo, prueba)
+
+cat("Datos usados:\n")
+print(datos)
+cat("\nTamano de entrenamiento y prueba:\n")
+print(dim(entrenamiento))
+print(dim(prueba))
+cat("\nModelo Naive Bayes FCI:\n")
+print(modelo)
+cat("\nPredicciones contra valores reales:\n")
+print(data.frame(prueba, Predicho = predicciones))
+cat("\nMatriz de confusion:\n")
+print(confusionMatrix(predicciones, prueba$Rendimiento))
+```
+
+## Conclusion
+
+La matriz de confusion compara el rendimiento predicho contra el rendimiento real
+en el conjunto de prueba. Al tratarse de atributos categoricos, Naive Bayes estima
+probabilidades condicionales para cada valor de atributo dentro de cada clase.
