@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aplicacion de Naive Bayes al conjunto Iris</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.5; margin: 36px; color: #1f2937; }
+    h1, h2 { color: #1f4e79; }
+    code, pre { font-family: Consolas, monospace; }
+    pre { background: #f3f7fa; border: 1px solid #d4dee8; padding: 14px; overflow-x: auto; }
+    .note { background: #fff7d6; border-left: 4px solid #d9a441; padding: 10px 14px; }
+  </style>
+</head>
+<body>
+  <h1>Aplicacion de Naive Bayes al conjunto Iris</h1>
+  <p>Este reporte aplica el clasificador Naive Bayes al conjunto Iris usando R. La variable objetivo es <code>Species</code> y los predictores son las medidas de sepalo y petalo.</p>
+  <h2>Procedimiento</h2>
+  <ol>
+    <li>Cargar <code>e1071</code>, <code>caret</code> y el conjunto <code>iris</code>.</li>
+    <li>Dividir los datos con semilla 123: 70% entrenamiento y 30% prueba.</li>
+    <li>Entrenar <code>naiveBayes(Species ~ ., data = train_data)</code>.</li>
+    <li>Evaluar con matriz de confusion y probar nuevas observaciones.</li>
+  </ol>
+  <h2>Codigo base usado</h2>
+  <pre>library(e1071)
+library(caret)
+data(iris)
+set.seed(123)
+train_index &lt;- createDataPartition(iris$Species, p = 0.7, list = FALSE)
+train_data &lt;- iris[train_index, ]
+test_data &lt;- iris[-train_index, ]
+modelo_nb &lt;- naiveBayes(Species ~ ., data = train_data)
+predicciones &lt;- predict(modelo_nb, test_data)
+cat(&quot;Dimensiones entrenamiento/prueba:\n&quot;)
+print(dim(train_data))
+print(dim(test_data))
+cat(&quot;\nModelo Naive Bayes:\n&quot;)
+print(modelo_nb)
+cat(&quot;\nMatriz de confusion:\n&quot;)
+print(confusionMatrix(predicciones, test_data$Species))
+cat(&quot;\nNuevas observaciones:\n&quot;)
+nuevos_datos &lt;- data.frame(
+  Sepal.Length = c(5.1, 6.7, 5.8),
+  Sepal.Width = c(3.5, 3.0, 2.7),
+  Petal.Length = c(1.4, 5.2, 4.2),
+  Petal.Width = c(0.2, 2.3, 1.3)
+)
+print(nuevos_datos)
+cat(&quot;\nPredicciones nuevas:\n&quot;)
+print(predict(modelo_nb, nuevos_datos))
+cat(&quot;\nProbabilidades:\n&quot;)
+print(predict(modelo_nb, nuevos_datos, type = &quot;raw&quot;))</pre>
+  <h2>Resultados de R</h2>
+  <pre>Dimensiones entrenamiento/prueba:
+[1] 105   5
+[1] 45  5
+
+Modelo Naive Bayes:
+
+Naive Bayes Classifier for Discrete Predictors
+
+Call:
+naiveBayes.default(x = X, y = Y, laplace = laplace)
+
+A-priori probabilities:
+Y
+    setosa versicolor  virginica 
+ 0.3333333  0.3333333  0.3333333 
+
+Conditional probabilities:
+            Sepal.Length
+Y                [,1]      [,2]
+  setosa     4.991429 0.3657156
+  versicolor 5.942857 0.4558674
+  virginica  6.631429 0.6846087
+
+            Sepal.Width
+Y                [,1]      [,2]
+  setosa     3.365714 0.3455114
+  versicolor 2.777143 0.3227508
+  virginica  2.982857 0.3222035
+
+            Petal.Length
+Y                [,1]      [,2]
+  setosa     1.471429 0.1808012
+  versicolor 4.262857 0.4222389
+  virginica  5.591429 0.5741344
+
+            Petal.Width
+Y                 [,1]       [,2]
+  setosa     0.2314286 0.09321521
+  versicolor 1.3285714 0.20518489
+  virginica  2.0342857 0.25775371
+
+
+Matriz de confusion:
+Confusion Matrix and Statistics
+
+            Reference
+Prediction   setosa versicolor virginica
+  setosa         15          0         0
+  versicolor      0         13         2
+  virginica       0          2        13
+
+Overall Statistics
+                                          
+               Accuracy : 0.9111          
+                 95% CI : (0.7878, 0.9752)
+    No Information Rate : 0.3333          
+    P-Value [Acc &gt; NIR] : 8.467e-16       
+                                          
+                  Kappa : 0.8667          
+                                          
+ Mcnemar&#x27;s Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: setosa Class: versicolor Class: virginica
+Sensitivity                 1.0000            0.8667           0.8667
+Specificity                 1.0000            0.9333           0.9333
+Pos Pred Value              1.0000            0.8667           0.8667
+Neg Pred Value              1.0000            0.9333           0.9333
+Prevalence                  0.3333            0.3333           0.3333
+Detection Rate              0.3333            0.2889           0.2889
+Detection Prevalence        0.3333            0.3333           0.3333
+Balanced Accuracy           1.0000            0.9000           0.9000
+
+Nuevas observaciones:
+  Sepal.Length Sepal.Width Petal.Length Petal.Width
+1          5.1         3.5          1.4         0.2
+2          6.7         3.0          5.2         2.3
+3          5.8         2.7          4.2         1.3
+
+Predicciones nuevas:
+[1] setosa     virginica  versicolor
+Levels: setosa versicolor virginica
+
+Probabilidades:
+            setosa   versicolor    virginica
+[1,]  1.000000e+00 8.913737e-20 5.114392e-26
+[2,] 1.785606e-203 1.268812e-06 9.999987e-01
+[3,]  9.123989e-80 9.998715e-01 1.285303e-04
+
+Cargando paquete requerido: ggplot2
+
+Adjuntando el paquete: &#x27;ggplot2&#x27;
+
+The following object is masked from &#x27;package:e1071&#x27;:
+
+    element
+
+Cargando paquete requerido: lattice</pre>
+  <h2>Conclusion</h2>
+  <p>Naive Bayes clasifica Iris con buen desempeno porque las variables de petalo separan claramente las especies. Los errores se concentran normalmente entre versicolor y virginica.</p>
+</body>
+</html>
