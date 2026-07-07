@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Actividad NB FCI</title>
+  <style>
+    body { font-family: Arial, sans-serif; line-height: 1.5; margin: 36px; color: #1f2937; }
+    h1, h2 { color: #1f4e79; }
+    pre { background: #f3f7fa; border: 1px solid #d4dee8; padding: 14px; overflow-x: auto; }
+    code, pre { font-family: Consolas, monospace; }
+    .note { background: #fff7d6; border-left: 4px solid #d9a441; padding: 10px 14px; }
+  </style>
+</head>
+<body>
+  <h1>Actividad NB FCI</h1>
+  <p>Este reporte aplica Naive Bayes en R a un conjunto de 30 estudiantes FCI con atributos categoricos.</p>
+  <h2>Procedimiento</h2>
+  <ol>
+    <li>Tabular 30 observaciones con las variables pedidas.</li>
+    <li>Entrenar con 80% de los datos.</li>
+    <li>Probar con el 20% restante.</li>
+    <li>Construir la matriz de confusion.</li>
+  </ol>
+  <h2>Codigo R</h2>
+  <pre>library(e1071)
+library(caret)
+
+datos &lt;- data.frame(
+  TiempoEstudio = c(&quot;Alto&quot;,&quot;Medio&quot;,&quot;Bajo&quot;,&quot;Alto&quot;,&quot;Medio&quot;,&quot;Alto&quot;,&quot;Bajo&quot;,&quot;Medio&quot;,&quot;Alto&quot;,&quot;Bajo&quot;,
+                    &quot;Alto&quot;,&quot;Medio&quot;,&quot;Bajo&quot;,&quot;Medio&quot;,&quot;Alto&quot;,&quot;Bajo&quot;,&quot;Medio&quot;,&quot;Alto&quot;,&quot;Bajo&quot;,&quot;Medio&quot;,
+                    &quot;Alto&quot;,&quot;Medio&quot;,&quot;Bajo&quot;,&quot;Alto&quot;,&quot;Medio&quot;,&quot;Bajo&quot;,&quot;Alto&quot;,&quot;Medio&quot;,&quot;Bajo&quot;,&quot;Alto&quot;),
+  Asistencia = c(&quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,&quot;Alta&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,
+                 &quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,&quot;Alta&quot;,&quot;Alta&quot;,&quot;Media&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Alta&quot;,
+                 &quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,&quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,&quot;Alta&quot;),
+  Participacion = c(&quot;Alta&quot;,&quot;Baja&quot;,&quot;Baja&quot;,&quot;Media&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Media&quot;,
+                    &quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Alta&quot;,&quot;Media&quot;,&quot;Baja&quot;,&quot;Media&quot;,
+                    &quot;Alta&quot;,&quot;Media&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Baja&quot;,&quot;Media&quot;,&quot;Alta&quot;,&quot;Baja&quot;,&quot;Alta&quot;),
+  SituacionEcon = c(&quot;Buena&quot;,&quot;Mala&quot;,&quot;Mala&quot;,&quot;Buena&quot;,&quot;Buena&quot;,&quot;Buena&quot;,&quot;Mala&quot;,&quot;Buena&quot;,&quot;Buena&quot;,&quot;Mala&quot;,
+                    &quot;Buena&quot;,&quot;Buena&quot;,&quot;Mala&quot;,&quot;Buena&quot;,&quot;Buena&quot;,&quot;Mala&quot;,&quot;Mala&quot;,&quot;Buena&quot;,&quot;Mala&quot;,&quot;Buena&quot;,
+                    &quot;Buena&quot;,&quot;Mala&quot;,&quot;Mala&quot;,&quot;Buena&quot;,&quot;Buena&quot;,&quot;Mala&quot;,&quot;Buena&quot;,&quot;Buena&quot;,&quot;Mala&quot;,&quot;Buena&quot;),
+  Rendimiento = c(&quot;Excelente&quot;,&quot;Regular&quot;,&quot;Deficiente&quot;,&quot;Bueno&quot;,&quot;Bueno&quot;,&quot;Excelente&quot;,&quot;Deficiente&quot;,&quot;Bueno&quot;,&quot;Excelente&quot;,&quot;Regular&quot;,
+                  &quot;Excelente&quot;,&quot;Bueno&quot;,&quot;Deficiente&quot;,&quot;Bueno&quot;,&quot;Excelente&quot;,&quot;Regular&quot;,&quot;Bueno&quot;,&quot;Excelente&quot;,&quot;Deficiente&quot;,&quot;Bueno&quot;,
+                  &quot;Excelente&quot;,&quot;Bueno&quot;,&quot;Regular&quot;,&quot;Excelente&quot;,&quot;Regular&quot;,&quot;Deficiente&quot;,&quot;Bueno&quot;,&quot;Bueno&quot;,&quot;Deficiente&quot;,&quot;Excelente&quot;)
+)
+
+datos[] &lt;- lapply(datos, factor)
+
+set.seed(20260704)
+idx &lt;- createDataPartition(datos$Rendimiento, p = 0.8, list = FALSE)
+entrenamiento &lt;- datos[idx, ]
+prueba &lt;- datos[-idx, ]
+
+modelo &lt;- naiveBayes(Rendimiento ~ ., data = entrenamiento, laplace = 1)
+predicciones &lt;- predict(modelo, prueba)
+
+cat(&quot;Datos usados:\n&quot;)
+print(datos)
+cat(&quot;\nTamano de entrenamiento y prueba:\n&quot;)
+print(dim(entrenamiento))
+print(dim(prueba))
+cat(&quot;\nModelo Naive Bayes FCI:\n&quot;)
+print(modelo)
+cat(&quot;\nPredicciones contra valores reales:\n&quot;)
+print(data.frame(prueba, Predicho = predicciones))
+cat(&quot;\nMatriz de confusion:\n&quot;)
+print(confusionMatrix(predicciones, prueba$Rendimiento))</pre>
+  <h2>Resultados</h2>
+  <pre>Datos usados:
+   TiempoEstudio Asistencia Participacion SituacionEcon Rendimiento
+1           Alto       Alta          Alta         Buena   Excelente
+2          Medio      Media          Baja          Mala     Regular
+3           Bajo       Baja          Baja          Mala  Deficiente
+4           Alto       Alta         Media         Buena       Bueno
+5          Medio      Media         Media         Buena       Bueno
+6           Alto       Alta          Alta         Buena   Excelente
+7           Bajo       Baja          Baja          Mala  Deficiente
+8          Medio       Alta         Media         Buena       Bueno
+9           Alto      Media          Alta         Buena   Excelente
+10          Bajo       Baja         Media          Mala     Regular
+11          Alto       Alta          Alta         Buena   Excelente
+12         Medio      Media         Media         Buena       Bueno
+13          Bajo       Baja          Baja          Mala  Deficiente
+14         Medio       Alta         Media         Buena       Bueno
+15          Alto       Alta          Alta         Buena   Excelente
+16          Bajo      Media          Baja          Mala     Regular
+17         Medio      Media          Alta          Mala       Bueno
+18          Alto       Alta         Media         Buena   Excelente
+19          Bajo       Baja          Baja          Mala  Deficiente
+20         Medio       Alta         Media         Buena       Bueno
+21          Alto      Media          Alta         Buena   Excelente
+22         Medio       Alta         Media          Mala       Bueno
+23          Bajo       Baja         Media          Mala     Regular
+24          Alto       Alta          Alta         Buena   Excelente
+25         Medio      Media          Baja         Buena     Regular
+26          Bajo       Baja          Baja          Mala  Deficiente
+27          Alto       Alta         Media         Buena       Bueno
+28         Medio      Media          Alta         Buena       Bueno
+29          Bajo       Baja          Baja          Mala  Deficiente
+30          Alto       Alta          Alta         Buena   Excelente
+
+Tamano de entrenamiento y prueba:
+[1] 25  5
+[1] 5 5
+
+Modelo Naive Bayes FCI:
+
+Naive Bayes Classifier for Discrete Predictors
+
+Call:
+naiveBayes.default(x = X, y = Y, laplace = laplace)
+
+A-priori probabilities:
+Y
+     Bueno Deficiente  Excelente    Regular 
+      0.32       0.20       0.32       0.16 
+
+Conditional probabilities:
+            TiempoEstudio
+Y                  Alto       Bajo      Medio
+  Bueno      0.18181818 0.09090909 0.72727273
+  Deficiente 0.12500000 0.75000000 0.12500000
+  Excelente  0.81818182 0.09090909 0.09090909
+  Regular    0.14285714 0.57142857 0.28571429
+
+            Asistencia
+Y                  Alta       Baja      Media
+  Bueno      0.54545455 0.09090909 0.36363636
+  Deficiente 0.12500000 0.75000000 0.12500000
+  Excelente  0.63636364 0.09090909 0.27272727
+  Regular    0.14285714 0.42857143 0.42857143
+
+            Participacion
+Y                  Alta       Baja      Media
+  Bueno      0.27272727 0.09090909 0.63636364
+  Deficiente 0.12500000 0.75000000 0.12500000
+  Excelente  0.72727273 0.09090909 0.18181818
+  Regular    0.14285714 0.42857143 0.42857143
+
+            SituacionEcon
+Y                Buena      Mala
+  Bueno      0.7000000 0.3000000
+  Deficiente 0.1428571 0.8571429
+  Excelente  0.9000000 0.1000000
+  Regular    0.3333333 0.6666667
+
+
+Predicciones contra valores reales:
+  TiempoEstudio Asistencia Participacion SituacionEcon Rendimiento   Predicho
+2         Medio      Media          Baja          Mala     Regular    Regular
+3          Bajo       Baja          Baja          Mala  Deficiente Deficiente
+4          Alto       Alta         Media         Buena       Bueno  Excelente
+5         Medio      Media         Media         Buena       Bueno      Bueno
+6          Alto       Alta          Alta         Buena   Excelente  Excelente
+
+Matriz de confusion:
+Confusion Matrix and Statistics
+
+            Reference
+Prediction   Bueno Deficiente Excelente Regular
+  Bueno          1          0         0       0
+  Deficiente     0          1         0       0
+  Excelente      1          0         1       0
+  Regular        0          0         0       1
+
+Overall Statistics
+                                          
+               Accuracy : 0.8             
+                 95% CI : (0.2836, 0.9949)
+    No Information Rate : 0.4             
+    P-Value [Acc &gt; NIR] : 0.08704         
+                                          
+                  Kappa : 0.7368          
+                                          
+ Mcnemar&#x27;s Test P-Value : NA              
+
+Statistics by Class:
+
+                     Class: Bueno Class: Deficiente Class: Excelente
+Sensitivity                  0.50               1.0            1.000
+Specificity                  1.00               1.0            0.750
+Pos Pred Value               1.00               1.0            0.500
+Neg Pred Value               0.75               1.0            1.000
+Prevalence                   0.40               0.2            0.200
+Detection Rate               0.20               0.2            0.200
+Detection Prevalence         0.20               0.2            0.400
+Balanced Accuracy            0.75               1.0            0.875
+                     Class: Regular
+Sensitivity                     1.0
+Specificity                     1.0
+Pos Pred Value                  1.0
+Neg Pred Value                  1.0
+Prevalence                      0.2
+Detection Rate                  0.2
+Detection Prevalence            0.2
+Balanced Accuracy               1.0
+
+Cargando paquete requerido: ggplot2
+
+Adjuntando el paquete: &#x27;ggplot2&#x27;
+
+The following object is masked from &#x27;package:e1071&#x27;:
+
+    element
+
+Cargando paquete requerido: lattice</pre>
+</body>
+</html>
