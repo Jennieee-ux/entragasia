@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SE 2 - Asignación de proyectos (Tau-Prolog)</title>
+<!--
+  Sistema experto (Tau-Prolog) para llevar el control de los
+  proyectos de software que se pueden asignar a un programador
+  de acuerdo a su nivel (junior, avanzado, senior).
+
+  Tau-Prolog es un intérprete de Prolog escrito en JavaScript que
+  corre directamente en el navegador: no requiere instalar nada,
+  basta con abrir este archivo .html.
+  Referencia: https://tau-prolog.org/
+-->
+<script src="https://unpkg.com/tau-prolog/modules/core.js"></script>
+<script src="https://unpkg.com/tau-prolog/modules/lists.js"></script>
+<style>
+  body { font-family: Arial, Helvetica, sans-serif; max-width: 900px; margin: 30px auto; padding: 0 20px; color: #222; }
+  h1 { font-size: 1.4em; }
+  h2 { font-size: 1.1em; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 4px; }
+  button { background: #2c5f9e; color: white; border: none; padding: 8px 14px; border-radius: 4px; cursor: pointer; margin: 4px 4px 4px 0; }
+  button:hover { background: #1f477a; }
+  select { padding: 6px; margin-right: 8px; }
+  pre { background: #f4f4f4; border: 1px solid #ddd; padding: 10px; border-radius: 4px; white-space: pre-wrap; min-height: 20px; }
+  #status { font-size: 0.9em; color: #555; }
+  .ok { color: #1a7a1a; }
+  .err { color: #b00020; }
+</style>
+</head>
+<body>
+
+<h1>Sistema experto: asignación de programadores a proyectos</h1>
+<p id="status">Cargando base de conocimiento en Tau-Prolog...</p>
+
+<h2>1. Desarrolladores y su nivel</h2>
+<button onclick="listarDesarrolladores()">Consultar desarrolladores</button>
+<pre id="out1"></pre>
+
+<h2>2. Proyectos y su nivel</h2>
+<button onclick="listarProyectos()">Consultar proyectos</button>
+<pre id="out2"></pre>
+
+<h2>3. ¿Se tiene el personal necesario para un proyecto?</h2>
+<select id="proyectoSelect3">
+  <option value="p1">proyecto_a (bajo)</option>
+  <option value="p2">proyecto_b (bajo)</option>
+  <option value="p3">proyecto_c (bajo)</option>
+  <option value="p4">proyecto_d (medio)</option>
+  <option value="p5">proyecto_e (medio)</option>
+  <option value="p6">proyecto_f (medio)</option>
+  <option value="p7">proyecto_g (alto)</option>
+  <option value="p8">proyecto_h (alto)</option>
+  <option value="p9" selected>proyecto_i (muy_alto)</option>
+  <option value="p10">proyecto_j (muy_alto)</option>
+</select>
+<button onclick="tienePersonal()">Verificar personal disponible</button>
+<pre id="out3"></pre>
+
+<h2>4. ¿Qué personal hace falta contratar para un proyecto?</h2>
+<select id="proyectoSelect4">
+  <option value="p1">proyecto_a (bajo)</option>
+  <option value="p2">proyecto_b (bajo)</option>
+  <option value="p3">proyecto_c (bajo)</option>
+  <option value="p4">proyecto_d (medio)</option>
+  <option value="p5">proyecto_e (medio)</option>
+  <option value="p6">proyecto_f (medio)</option>
+  <option value="p7">proyecto_g (alto)</option>
+  <option value="p8">proyecto_h (alto)</option>
+  <option value="p9" selected>proyecto_i (muy_alto)</option>
+  <option value="p10">proyecto_j (muy_alto)</option>
+</select>
+<button onclick="personalFaltante()">Consultar personal faltante</button>
+<pre id="out4"></pre>
+
+<h2>Consulta libre (avanzado)</h2>
+<p>Escribe cualquier consulta Prolog válida contra la base de conocimiento, por ejemplo: <code>disponibles_nivel(senior, L).</code></p>
+<input type="text" id="freeQuery" style="width:70%; padding:6px;" value="disponibles_nivel(senior, L).">
+<button onclick="consultaLibre()">Ejecutar</button>
+<pre id="outFree"></pre>
+
+<script>
+/* ============================================================
+   BASE DE CONOCIMIENTO (idéntica a kb.pl, embebida como texto
+   para que Tau-Prolog la consulte en el navegador)
+   ============================================================ */
+const programa = `
+:- use_module(library(lists)).
+
+desarrollador(d1,  ana,    junior).
+desarrollador(d2,  bruno,  junior).
+desarrollador(d3,  carla,  junior).
+desarrollador(d4,  diego,  avanzado).
+desarrollador(d5,  elena,  avanzado).
+desarrollador(d6,  fabio,  avanzado).
+desarrollador(d7,  gina,   avanzado).
+desarrollador(d8,  hugo,   senior).
+desarrollador(d9,  irene,  senior).
+desarrollador(d10, jose,   senior).
+
+proyecto(p1,  proyecto_a, bajo).
+proyecto(p2,  proyecto_b, bajo).
+proyecto(p3,  proyecto_c, bajo).
+proyecto(p4,  proyecto_d, medio).
+proyecto(p5,  proyecto_e, medio).
+proyecto(p6,  proyecto_f, medio).
+proyecto(p7,  proyecto_g, alto).
+proyecto(p8,  proyecto_h, alto).
+proyecto(p9,  proyecto_i, muy_alto).
+proyecto(p10, proyecto_j, muy_alto).
+
+asignado(d8, p4).
+asignado(d4, p1).
+
+requiere(bajo,     junior(1), avanzado(1), senior(0)).
+requiere(medio,    junior(0), avanzado(1), senior(1)).
+requiere(alto,     junior(1), avanzado(1), senior(1)).
+requiere(muy_alto, junior(2), avanzado(2), senior(1)).
+
+disponible(D) :-
+    desarrollador(D, _, _),
+    \\+ asignado(D, _).
+
+disponibles_nivel(Nivel, Lista) :-
+    findall(D, (desarrollador(D, _, Nivel), disponible(D)), Lista).
+
+cuenta_disponibles(Nivel, N) :-
+    disponibles_nivel(Nivel, Lista),
+    length(Lista, N).
+
+lista_desarrolladores(L) :-
+    findall(dev(Id, Nombre, Nivel), desarrollador(Id, Nombre, Nivel), L).
+
+lista_proyectos(L) :-
+    findall(proy(Id, Nombre, Nivel), proyecto(Id, Nombre, Nivel), L).
+
+tiene_personal(Proyecto) :-
+    proyecto(Proyecto, _, Nivel),
+    requiere(Nivel, junior(J), avanzado(A), senior(S)),
+    cuenta_disponibles(junior, CJ),   CJ >= J,
+    cuenta_disponibles(avanzado, CA), CA >= A,
+    cuenta_disponibles(senior, CS),   CS >= S.
+
+personal_faltante(Proyecto, Faltantes) :-
+    proyecto(Proyecto, _, Nivel),
+    requiere(Nivel, junior(J), avanzado(A), senior(S)),
+    cuenta_disponibles(junior, CJ),
+    cuenta_disponibles(avanzado, CA),
+    cuenta_disponibles(senior, CS),
+    findall(faltante(NivelReq, Cantidad),
+        ( member(NivelReq-Requerido-Disponible,
+                 [junior-J-CJ, avanzado-A-CA, senior-S-CS]),
+          Cantidad is Requerido - Disponible,
+          Cantidad > 0
+        ),
+        Faltantes).
+`;
+
+const session = pl.create(50000);
+
+session.consult(programa, {
+  success: function () {
+    document.getElementById("status").innerHTML =
+      '<span class="ok">Base de conocimiento cargada correctamente.</span>';
+  },
+  error: function (err) {
+    document.getElementById("status").innerHTML =
+      '<span class="err">Error al cargar la base de conocimiento: ' + session.format_answer(err) + '</span>';
+  }
+});
+
+/* Ejecuta una consulta Prolog con una única variable de salida y muestra
+   el resultado formateado en el elemento <pre> indicado. */
+function ejecutar(goal, outputId) {
+  const out = document.getElementById(outputId);
+  out.textContent = "Consultando...";
+  session.query(goal, {
+    success: function () {
+      session.answer({
+        success: function (answer) {
+          out.textContent = session.format_answer(answer);
+        },
+        error: function (err) {
+          out.textContent = "Error: " + session.format_answer(err);
+        },
+        fail: function () {
+          out.textContent = "No se encontraron resultados (false).";
+        },
+        limit: function () {
+          out.textContent = "Se alcanzó el límite de cómputo.";
+        }
+      });
+    },
+    error: function (err) {
+      out.textContent = "Error en la consulta: " + session.format_answer(err);
+    }
+  });
+}
+
+function listarDesarrolladores() {
+  ejecutar("lista_desarrolladores(L).", "out1");
+}
+
+function listarProyectos() {
+  ejecutar("lista_proyectos(L).", "out2");
+}
+
+function tienePersonal() {
+  const proyecto = document.getElementById("proyectoSelect3").value;
+  // No hay variable de salida: reportamos true/false explícitamente.
+  const out = document.getElementById("out3");
+  out.textContent = "Consultando...";
+  session.query("tiene_personal(" + proyecto + ").", {
+    success: function () {
+      session.answer({
+        success: function () {
+          out.textContent = "SI, se cuenta con el personal disponible necesario para " + proyecto + ".";
+        },
+        error: function (err) {
+          out.textContent = "Error: " + session.format_answer(err);
+        },
+        fail: function () {
+          out.textContent = "NO, no se cuenta con el personal disponible necesario para " + proyecto + ".";
+        },
+        limit: function () {
+          out.textContent = "Se alcanzó el límite de cómputo.";
+        }
+      });
+    },
+    error: function (err) {
+      out.textContent = "Error en la consulta: " + session.format_answer(err);
+    }
+  });
+}
+
+function personalFaltante() {
+  const proyecto = document.getElementById("proyectoSelect4").value;
+  ejecutar("personal_faltante(" + proyecto + ", Faltantes).", "out4");
+}
+
+function consultaLibre() {
+  const q = document.getElementById("freeQuery").value.trim();
+  ejecutar(q.endsWith(".") ? q : q + ".", "outFree");
+}
+</script>
+</body>
+</html>
