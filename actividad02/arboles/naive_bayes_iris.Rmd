@@ -1,0 +1,99 @@
+---
+title: "Aplicacion de Naive Bayes al conjunto Iris"
+author: "Actividad de Arboles y Naive Bayes"
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    theme: readable
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)
+```
+
+## Objetivo
+
+Este documento aplica el clasificador Naive Bayes al conjunto de datos Iris usando R.
+La variable objetivo es `Species` y los predictores son las cuatro medidas de sepalo
+y petalo.
+
+## Carga de paquetes y datos
+
+```{r}
+library(e1071)
+library(caret)
+library(ggplot2)
+
+data(iris)
+str(iris)
+summary(iris)
+```
+
+## Separacion entrenamiento-prueba
+
+Se usa una semilla fija para que el resultado sea reproducible. El 70% de las
+observaciones se usa para entrenar y el 30% para evaluar.
+
+```{r}
+set.seed(123)
+train_index <- createDataPartition(iris$Species, p = 0.7, list = FALSE)
+train_data <- iris[train_index, ]
+test_data <- iris[-train_index, ]
+
+dim(train_data)
+dim(test_data)
+table(train_data$Species)
+table(test_data$Species)
+```
+
+## Entrenamiento del modelo
+
+La formula `Species ~ .` indica que la especie se predice usando todos los demas
+atributos numericos.
+
+```{r}
+modelo_nb <- naiveBayes(Species ~ ., data = train_data)
+modelo_nb
+```
+
+## Prediccion y matriz de confusion
+
+```{r}
+predicciones <- predict(modelo_nb, test_data)
+matriz <- confusionMatrix(predicciones, test_data$Species)
+matriz
+```
+
+## Probabilidades para nuevas observaciones
+
+```{r}
+nuevos_datos <- data.frame(
+  Sepal.Length = c(5.1, 6.7, 5.8),
+  Sepal.Width = c(3.5, 3.0, 2.7),
+  Petal.Length = c(1.4, 5.2, 4.2),
+  Petal.Width = c(0.2, 2.3, 1.3)
+)
+
+predict(modelo_nb, nuevos_datos)
+predict(modelo_nb, nuevos_datos, type = "raw")
+```
+
+## Visualizacion
+
+```{r}
+ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) +
+  geom_point(size = 2) +
+  labs(
+    title = "Iris: longitud y ancho de petalo",
+    x = "Petal.Length",
+    y = "Petal.Width"
+  ) +
+  theme_minimal()
+```
+
+## Conclusion
+
+Naive Bayes obtiene una clasificacion alta en Iris porque las especies presentan
+separacion clara, especialmente en las variables del petalo. La matriz de confusion
+permite ver en que clases se concentran los errores del modelo.
