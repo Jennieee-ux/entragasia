@@ -1,0 +1,26 @@
+# ----- Sistema operativo -----
+.DS_Store
+Thumbs.db
+
+# ----- Editores / IDEs -----
+.vscode/
+.idea/
+*.swp
+
+# ----- SWI-Prolog -----
+*.qlf
+*.state
+
+# ----- Go -----
+/se3-go-ingredientes/ingredientes
+/se3-go-ingredientes/*.exe
+/se3-go-ingredientes/*.test
+/se3-go-ingredientes/*.out
+
+# ----- Node / npm (por si se usa tooling auxiliar) -----
+node_modules/
+npm-debug.log*
+
+# ----- Logs y temporales -----
+*.log
+*.tmp
